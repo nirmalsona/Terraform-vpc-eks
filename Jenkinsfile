@@ -26,6 +26,7 @@ pipeline {
                 terraform init
                 terraform validate
 
+               '''
        }
        }
     }

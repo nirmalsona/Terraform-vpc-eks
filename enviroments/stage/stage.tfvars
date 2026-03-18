@@ -5,4 +5,4 @@ kubernetes_version = "1.33"
 min                = 1
 max                = 1
 desired            = 1
-instance_types     = ["t3.medium"]
+instance_types     = ["t3.small"]

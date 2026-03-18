@@ -18,13 +18,25 @@ pipeline {
             }
         }
 
-        stage ('change directory' ) {
+        stage ('change directory & init' ) {
             steps {
                 sh '''
 
                 cd enviroments
                 terraform init
                 terraform validate
+
+               '''
+       }
+       }
+
+        stage ('change directory & plan and apply' ) {
+            steps {
+                sh '''
+
+                cd enviroments
+                terraform plan
+                terraform apply --auto-approve
 
                '''
        }

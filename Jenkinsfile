@@ -22,7 +22,9 @@ pipeline {
             steps {
                 sh '''
 
-                cd enviroments && terraform init && terraform validate
+                cd enviroments
+                terraform init
+                terraform validate
 
        }
        }

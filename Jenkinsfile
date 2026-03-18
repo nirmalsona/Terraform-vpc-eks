@@ -18,6 +18,13 @@ pipeline {
             }
         }
 
-       
+        stage ('change directory' ) {
+            steps {
+                sh '''
+
+                cd enviroments && terraform init && terraform validate
+
+       }
+       }
     }
 }

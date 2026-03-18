@@ -22,7 +22,7 @@ pipeline {
             steps {
                 sh '''
 
-                cd enviroments
+                cd enviroments/dev
                 terraform init
                 terraform validate
 
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 sh '''
 
-                cd enviroments
+                cd enviroments/dev
                 terraform plan
                 terraform apply --auto-approve
 

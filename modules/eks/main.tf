@@ -37,7 +37,7 @@ module "eks" {
 
       instance_types = var.instance_types
 
-      ami_type = "AL2023_x86_64_STANDARD"
+      ami_type = "ami-0ec10929233384c7f"
 
       disk_size = 10
 

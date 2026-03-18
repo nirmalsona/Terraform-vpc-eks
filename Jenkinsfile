@@ -1,45 +1,90 @@
 pipeline {
-
     agent { label 'jenkins-agent' }
 
-    stages {
+    environment {
+        REPO_URL = 'git@github.com:nirmalsona/Terraform-vpc-eks.git'
+        CREDENTIALS_ID = 'github-key'
+    }
 
+    stages {
         stage('Clone Code') {
             steps {
-                git branch: 'main',
-                credentialsId: 'github-key',
-                url: 'git@github.com:nirmalsona/Terraform-vpc-eks.git'
+                git branch: "${env.BRANCH_NAME}",
+                    credentialsId: "${CREDENTIALS_ID}",
+                    url: "${REPO_URL}"
             }
         }
 
-        stage('Verify') {
+        stage('Set Environment Mapping') {
             steps {
-                sh 'ls -a'
+                script {
+                    if (env.BRANCH_NAME == "develop") {
+                        envFolder = "environments/dev"
+                        tfVars = "dev.tfvars"
+                    } else if (env.BRANCH_NAME == "stage") {
+                        envFolder = "environments/stage"
+                        tfVars = "stage.tfvars"
+                    } else if (env.BRANCH_NAME == "main") {
+                        envFolder = "environments/dev"
+                        tfVars = "dev.tfvars"
+                    } else {
+                        error "Branch ${env.BRANCH_NAME} not mapped to environment!"
+                    }
+                }
             }
         }
 
-        stage ('change directory & init' ) {
+        stage('Terraform Init & Validate') {
             steps {
-                sh '''
+                sh """
+                    cd ${envFolder}
+                    terraform init -backend-config="key=terraform-${env.BRANCH_NAME}.tfstate"
+                    terraform validate
+                """
+            }
+        }
 
-                cd enviroments/dev
-                terraform init
-                terraform validate
-
-               '''
-       }
-       }
-
-        stage ('change directory & plan and apply' ) {
+        stage('Terraform Plan') {
             steps {
-                sh '''
+                sh """
+                    cd ${envFolder}
+                    terraform plan -var-file=${tfVars} -out=tfplan
+                """
+            }
+        }
 
-                cd enviroments/dev
-                terraform plan -var-file=dev.tfvars
-                terraform destroy -var-file=dev.tfvars --auto-approve
+        stage('Terraform Apply') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh """
+                    cd ${envFolder}
+                    terraform apply -auto-approve tfplan
+                """
+            }
+        }
 
-               '''
-       }
-       }
+        stage('Approval & Apply for Stage/Prod') {
+            when {
+                anyOf {
+                    branch 'stage'
+                    branch 'main'
+                }
+            }
+            steps {
+                input message: "Approve deployment to ${env.BRANCH_NAME}?"
+                sh """
+                    cd ${envFolder}
+                    terraform apply -auto-approve tfplan
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '**/tfplan', fingerprint: true
+        }
     }
 }

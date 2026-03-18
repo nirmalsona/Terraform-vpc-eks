@@ -35,8 +35,8 @@ pipeline {
                 sh '''
 
                 cd enviroments/dev
-                terraform plan -var-file=enviroments/dev/dev.tfvars
-                terraform apply -varfile=enviroments/dev/dev.tfvars --auto-approve
+                terraform plan -var-file=dev.tfvars
+                terraform apply -varfile=dev.tfvars --auto-approve
 
                '''
        }

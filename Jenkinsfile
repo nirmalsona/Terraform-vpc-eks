@@ -14,7 +14,7 @@ pipeline {
 
         stage('Verify') {
             steps {
-                sh 'ls -l'
+                sh 'ls -altr'
             }
         }
 
